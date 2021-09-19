@@ -88,10 +88,14 @@ class pubsub():
         if data["type"] == "to hit":
             if 20 in data['values']:
                 msg = "{char} attacks with their {item}, and rolls {result}. It is a CRITICAL HIT!!! ({detail})"
+            elif 1 in data['values']:
+                msg = "{char} attacks with their {item}, and rolls {result}. It is a CRITICAL FAILURE riPepperonis ({detail})"
             else:
                 msg = "{char} attacks with their {item}, and rolls {result}! ({detail})"
         if data["type"] == "damage":
             msg = "{char}'s {item} hits for {result} damage! ({detail})"
+        if data["type"] == "heal":
+            msg = "{char} casts {item} and heals their target for {result} points! ({detail})"
         self.bot.connMgr.send_message(msg.format(**data))
         pass
 
