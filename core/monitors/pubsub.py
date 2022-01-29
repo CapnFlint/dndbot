@@ -37,9 +37,9 @@ class pubsub():
 
     # handle RESPONSE
     def _response(self, msg):
-        logging.debug("Handling RESPONSE")
+        print("Handling RESPONSE")
         if(msg["error"] != ""):
-            logging.error("Error found: '%s'" % msg["error"])
+            print("Error found: '%s'" % msg["error"])
 
     # handle RECONNECT
     def _reconnect(self):
@@ -50,9 +50,10 @@ class pubsub():
 
     # handle Message
     def on_message(self, wsapp, message):
+        print("Message", message, "---")
         if message == "pong":
             self._pong()
-        else:
+        elif message:
             msg = json.loads(message)
             data = {}
             if ('rolls' in msg['data']):
@@ -66,6 +67,8 @@ class pubsub():
                     data['values'] = roll['result']['values']
                     logging.debug(data)
                     self.show_message(data)
+        else:
+            logging.debug('empty message')
             
     def show_message(self, data):
         msg = ""
@@ -108,7 +111,7 @@ class pubsub():
         self._reconnect()
 
     def on_open(self, wsapp):
-        logging.debug("on_open called")
+        print("on_open called")
         def run(*args):
             # ping!
             try:
@@ -116,11 +119,11 @@ class pubsub():
                     self._ping()
                     time.sleep(10)
                     if(self.ping_ok == False):
-                        logging.error("Ping failed, reconnecting!")
+                        print("Ping failed, reconnecting!")
                         self._reconnect()
                     time.sleep(230)
             except WebSocketConnectionClosedException:
-                logging.debug("Socket closed, restarting!")
+                print("Socket closed, restarting!")
                 self._reconnect()
         threading.Thread(target=run).start()
 
@@ -128,6 +131,7 @@ class pubsub():
         logging.info("Connecting...")
         #websocket.enableTrace(True)
         auth_token = self._get_token()
+        logging.debug('token: ' + auth_token)
         self.ws = websocket.WebSocketApp(config['dndbeyond']['websocket_url'] + auth_token,
                                     on_message = self.on_message,
                                     on_error = self.on_error,
